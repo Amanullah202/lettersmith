@@ -4,7 +4,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import mammoth from "mammoth";
 
 // set the PDF worker (browser-safe)
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 export async function extractTextFromFile(file) {
   const type = file.type;
@@ -31,6 +31,9 @@ export async function extractTextFromFile(file) {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
+
+        console.log(`📄 Page ${i} raw content:\n`, JSON.stringify(content, null, 2));
+
         const strings = content.items.map((item) => item.str).join(" ");
         fullText += strings + "\n";
       }
@@ -43,11 +46,15 @@ export async function extractTextFromFile(file) {
         };
       }
 
+      console.log("✅ Full extracted PDF text:\n", fullText.trim());
+
       return { text: fullText.trim(), error: null };
     }
 
     if (isDOCX) {
       const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+
+      console.log("✅ Full extracted DOCX result:\n", JSON.stringify(result, null, 2));
 
       if (!result.value.trim()) {
         return {
@@ -57,12 +64,14 @@ export async function extractTextFromFile(file) {
         };
       }
 
+      console.log("✅ DOCX raw text:\n", result.value.trim());
+
       return { text: result.value.trim(), error: null };
     }
 
     return { text: "", error: "Unhandled file type." };
   } catch (err) {
-    console.error("Parsing error:", err);
+    console.error("❌ Parsing error:\n", err);
     return {
       text: "",
       error:

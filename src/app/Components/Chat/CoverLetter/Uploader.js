@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { extractTextFromFile } from "@/utils/extractText";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Uploader = ({ onClose, onDone }) => {
   const [fileName, setFileName] = useState("");
@@ -18,25 +18,14 @@ const Uploader = ({ onClose, onDone }) => {
     setText("");
 
     try {
-      const result = await extractTextFromFile(file);
-
-      if (result.error) {
-        setError(`❌ ${result.error}`);
-        setStatus("error");
-        return;
-      }
-
-      if (!result.text || result.text.length < 5) {
-        setError("❌ File parsed, but not enough readable text found.");
-        setStatus("error");
-        return;
-      }
-
-      setText(result.text);
+      const { extractTextFromFile } = await import("@/utils/extractText");
+      const parsed = await extractTextFromFile(file);
+      setText(parsed.text);
+      if (parsed.error) setError(parsed.error);
       setStatus("done");
     } catch (err) {
-      console.error(err);
-      setError("❌ Parsing failed. Try pasting your CV manually.");
+      console.error("❌ Runtime error:", err);
+      setError("❌ Something went wrong while reading the file.");
       setStatus("error");
     }
   };
@@ -50,72 +39,125 @@ const Uploader = ({ onClose, onDone }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/60">
-      <div className="relative w-[95vw] sm:w-[600px] max-h-[90vh] bg-black border border-white p-6 rounded-xl flex flex-col gap-4 overflow-hidden shadow-lg">
-        <button
-          onClick={handleClose}
-          className="absolute top-3 right-4 text-white text-lg hover:text-red-500 font-bold"
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <motion.div
+          className="relative w-[95vw] sm:w-[600px] max-h-[90vh] bg-black border border-white p-6 rounded-xl flex flex-col gap-4 overflow-hidden shadow-lg"
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.6, opacity: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+          }}
         >
-          ×
-        </button>
+          <motion.button
+            onClick={handleClose}
+            className="absolute top-3 right-4 text-white text-lg font-bold"
+            whileHover={{ rotate: 90, scale: 1.2 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            ×
+          </motion.button>
 
-        <h2 className="text-white text-xl font-semibold">
-          Upload a PDF or DOCX file
-        </h2>
+          <motion.h2
+            className="text-white text-xl font-semibold"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            Upload a PDF or DOCX file
+          </motion.h2>
 
-        {status === "idle" && (
-          <input
-            type="file"
-            accept=".pdf,.docx"
-            onChange={handleFileChange}
-            className="block w-full text-sm text-white mt-2 bg-neutral-900 border border-white px-4 py-2 rounded-md cursor-pointer"
-          />
-        )}
-
-        {(status === "parsing" || status === "done" || status === "error") && (
-          <div className="text-white text-sm mt-2">
-            <p className="mb-2 font-medium">📄 {fileName}</p>
-            {status === "parsing" && (
-              <p className="text-cyan-300 animate-pulse">Parsing file...</p>
-            )}
-            {error && <p className="text-red-500 font-semibold">{error}</p>}
-          </div>
-        )}
-
-        {text && status === "done" && (
-          <div className="flex flex-col gap-2">
-            <label className="text-xs text-neutral-400">
-              (Not meant to be read by humans. Formatting may be broken.)
-            </label>
-            <textarea
-              value={text}
-              readOnly
-              rows={8}
-              className="w-full bg-neutral-900 border border-neutral-700 text-white p-3 rounded-md text-sm resize-none overflow-y-auto"
+          {status === "idle" && (
+            <motion.input
+              type="file"
+              accept=".pdf,.docx"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-white mt-2 bg-neutral-900 border border-white px-4 py-2 rounded-md cursor-pointer"
+              animate={{ opacity: [1, 0.7, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
             />
-          </div>
-        )}
+          )}
 
-        <div className="mt-auto flex justify-between items-center pt-4">
-          {status !== "idle" && (
-            <button
-              onClick={handleClose}
-              className="text-white px-4 py-2 border border-white rounded-md hover:bg-white hover:text-black transition-all duration-150"
+          {(status === "parsing" ||
+            status === "done" ||
+            status === "error") && (
+            <motion.div
+              className="text-white text-sm mt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
             >
-              Discard
-            </button>
+              <p className="mb-2 font-medium">📄 {fileName}</p>
+              {status === "parsing" && (
+                <motion.p
+                  className="text-cyan-300"
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
+                >
+                  Parsing file...
+                </motion.p>
+              )}
+              {error && <p className="text-red-500 font-semibold">{error}</p>}
+            </motion.div>
           )}
-          {status === "done" && (
-            <button
-              onClick={handleDone}
-              className="text-black bg-white px-4 py-2 rounded-md font-semibold hover:opacity-90 transition-all duration-150"
+
+          {text && status === "done" && (
+            <motion.div
+              className="flex flex-col gap-2"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
             >
-              Done
-            </button>
+              <label className="text-xs text-neutral-400">
+                (Not meant to be read by humans. Formatting may be broken.)
+              </label>
+              <textarea
+                value={text}
+                readOnly
+                rows={8}
+                className="w-full bg-neutral-900 border border-neutral-700 text-white p-3 rounded-md text-sm resize-none overflow-y-auto"
+              />
+            </motion.div>
           )}
-        </div>
-      </div>
-    </div>
+
+          <motion.div
+            className="mt-auto flex justify-between items-center pt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            {status !== "idle" && (
+              <motion.button
+                onClick={handleClose}
+                className="text-white px-4 py-2 border border-white rounded-md hover:bg-white hover:text-black"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Discard
+              </motion.button>
+            )}
+            {status === "done" && (
+              <motion.button
+                onClick={handleDone}
+                className="text-black bg-white px-4 py-2 rounded-md font-semibold hover:opacity-90"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                Done
+              </motion.button>
+            )}
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
