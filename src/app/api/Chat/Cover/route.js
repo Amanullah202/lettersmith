@@ -19,13 +19,15 @@ And here is my CV:\n${body.cvText}\n
 User prompt: ${body.prompt}`;
 
     console.log("🧠 Constructed prompt for OpenRouter:\n", prompt);
+    const systemPrompt =
+      "You are an expert cover letter writer. Your task is to write complete, polished, and tailored cover letters using the job description, the user's CV, and their input prompt. DO NOT hallucinate any user information like name, email, phone, or role title. The user's full CV is provided in plain text. Use that information directly to: - Address the user by their actual name - Include their real email and phone number - Mention relevant education, experience, and skills. If any detail is not found in the CV, then check if it is provided in the prompt. If it is not found in CV or prompt, then and only then, use a placeholder like [NAME], [EMAIL], [PHONE], [ADDRESS]. Never use both placeholders and real info together. Use one or the other consistently. Keep the letter focused, clean, and professional. Avoid fluff or repetition. You are not a chatbot. You are a reliable writing assistant that helps users apply for jobs with real, usable letters.";
 
     const payload = {
       model: "mistralai/mistral-7b-instruct",
       messages: [
         {
           role: "system",
-          content: "You are an assistant that writes excellent cover letters. Donot hullicunate. You are a professional Cover letter writer. DONOT use placeholders for users name, phone number or any other details. user has already attached those details in the CV. if CV is not present, see if details provided in User prompt, or in any other way. if still no where to be found, then use placeholders like [NAME], [PHONE], [EMAIL] etc.",
+          content: systemPrompt,
         },
         { role: "user", content: prompt },
       ],
