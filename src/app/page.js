@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Test from "./Components/Randoms/Test";
+import ToastTester from "@/Components/Randoms/ToastTester";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <h1 className="text-4xl font-bold">Welcome to letter Smith Ai!</h1>
         <Test />
+        <ToastTester />
       </main>
       
     </div>

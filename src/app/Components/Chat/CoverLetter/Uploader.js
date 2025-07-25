@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 
 const Uploader = ({ onClose, onDone }) => {
   const [fileName, setFileName] = useState("");
@@ -21,11 +22,17 @@ const Uploader = ({ onClose, onDone }) => {
       const { extractTextFromFile } = await import("@/utils/extractText");
       const parsed = await extractTextFromFile(file);
       setText(parsed.text);
-      if (parsed.error) setError(parsed.error);
+      if (parsed.error) {
+        setError(parsed.error);
+        toast.error(parsed.error || "Something went wrong extracting text");
+      } else {
+        toast.success("✅ File parsed successfully!");
+      }
       setStatus("done");
     } catch (err) {
       console.error("❌ Runtime error:", err);
       setError("❌ Something went wrong while reading the file.");
+      toast.error("❌ Failed to read file. Please try again.");
       setStatus("error");
     }
   };
@@ -35,6 +42,7 @@ const Uploader = ({ onClose, onDone }) => {
   };
 
   const handleDone = () => {
+    toast.info("📄 CV text added!");
     onDone?.(text);
   };
 
@@ -76,14 +84,22 @@ const Uploader = ({ onClose, onDone }) => {
           </motion.h2>
 
           {status === "idle" && (
-            <motion.input
-              type="file"
-              accept=".pdf,.docx"
-              onChange={handleFileChange}
-              className="block w-full text-sm text-white mt-2 bg-neutral-900 border border-white px-4 py-2 rounded-md cursor-pointer"
-              animate={{ opacity: [1, 0.7, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            />
+            <div className="relative group">
+              <input
+                id="cv-upload"
+                type="file"
+                accept=".pdf,.docx"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <label
+                htmlFor="cv-upload"
+                className="block w-full text-sm text-white bg-neutral-900 border border-white px-4 py-2 rounded-md cursor-pointer text-center transition-transform duration-200 group-hover:scale-102 group-hover:border-cyan-400"
+              >
+                Choose File{" "}
+                {fileName ? `(${fileName})` : "(No file is chosen yet)"}
+              </label>
+            </div>
           )}
 
           {(status === "parsing" ||
