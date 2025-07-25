@@ -1,71 +1,49 @@
-export async function POST(req) {
-  console.log("📥 Incoming POST request to /api/Chat/Cover");
+"use client";
+import React, { useState } from "react";
+import Input from "./CoverInput";
+import Show from "./CoverShow";
 
-  try {
-    const body = await req.json();
-    console.log("🧾 Parsed body from client:", body);
+const CoverletterFinal = () => {
+  const [inputData, setInputData] = useState(null);
 
-    const OPENROUTER_API_KEY = process.env.OPENROUTERS_API_KEY;
-    if (!OPENROUTER_API_KEY) {
-      console.error("❌ Missing OPENROUTERS_API_KEY in env");
-      return new Response(JSON.stringify({ error: "Missing API Key" }), {
-        status: 401,
+  const handleSubmit = async (data) => {
+    console.log("Received from Input:", data);
+
+    try {
+      const res = await fetch("/api/Chat/Cover", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to generate cover letter");
+      }
+
+      const result = await res.json();
+      setInputData(result);
+    } catch (error) {
+      setInputData({ error: error.message });
     }
+  };
 
-    const prompt = `Generate a ${body.length}, ${body.tone} cover letter in ${body.language}, using this style: ${body.style}. 
-Here is the job description:\n${body.jobDescription}\n
-And here is my CV:\n${body.cvText}\n
-User prompt: ${body.prompt}`;
+  return (
+    <div className="w-full" style={{ height: "calc(100vh - 80px)" }}>
+      <div className="w-full h-full flex flex-col md:flex-row gap-6 px-6 py-6">
+        {/* Left panel */}
+        <div className="w-full md:w-1/2 h-full flex flex-col">
+          <Show data={inputData} />
+        </div>
 
-    console.log("🧠 Constructed prompt for OpenRouter:\n", prompt);
+        {/* Right panel */}
+        <div className="w-full md:w-1/2 h-full flex flex-col">
+          <Input onSubmit={handleSubmit} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
-    const payload = {
-      model: "mistralai/mistral-7b-instruct", // ✅ Free-tier model
-      messages: [
-        { role: "system", content: "You are an assistant that writes excellent cover letters." },
-        { role: "user", content: prompt },
-      ],
-    };
-
-    console.log("📦 Sending payload to OpenRouter:", payload);
-
-    const openrouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    console.log("⏳ Awaiting response from OpenRouter...");
-
-    if (!openrouterRes.ok) {
-      const errorText = await openrouterRes.text();
-      console.error("❌ OpenRouter API error response:", errorText);
-      return new Response(
-        JSON.stringify({ error: "OpenRouter Error", detail: errorText }),
-        { status: 500 }
-      );
-    }
-
-    const result = await openrouterRes.json();
-    console.log("✅ OpenRouter response received:", result);
-
-    const aiMessage = result.choices?.[0]?.message?.content || "⚠️ No content in response";
-
-    console.log("📝 Extracted AI message:", aiMessage);
-
-    return new Response(JSON.stringify({ aiMessage }), {
-      status: 200,
-    });
-
-  } catch (error) {
-    console.error("🔥 Server error:", error);
-    return new Response(
-      JSON.stringify({ error: "Something went wrong", detail: error.message }),
-      { status: 500 }
-    );
-  }
-}
+export default CoverletterFinal;
