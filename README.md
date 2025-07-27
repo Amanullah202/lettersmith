@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ✉️ Lettersmith AI
 
-## Getting Started
+Lettersmith AI is a modern web app that helps you **instantly generate tailored cover letters** using your CV and job description — right in the browser.
 
-First, run the development server:
+Built with **Next.js 15**, **React 19**, **Framer Motion**, and powered by **OpenRouter API**, it combines a sleek user experience with serverless AI generation.
+
+---
+
+## 🚀 Features
+
+- ✨ Generate custom cover letters from your CV + job description
+- 📄 Upload `.pdf` or `.docx` resumes (processed fully in-browser)
+- 🔄 Choose tone, length, style, and language
+- ⚙️ Copy, download as PDF or DOCX — all in one click
+- ⚡ Fast, no backend API calls for file parsing (client-side parsing)
+- 🎨 Smooth animations, responsive design, minimal UI
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js (App Router, React Server Components)
+- **Styling**: Tailwind CSS
+- **Animation**: Framer Motion
+- **PDF Parsing**: `pdfjs-dist`
+- **DOCX Parsing**: `mammoth`
+- **Export Utilities**: `pdf-lib`, `docx`
+- **AI API**: OpenRouter (LLM wrapper)
+
+---
+
+## 🧪 Getting Started
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/your-username/lettersmith.git
+cd lettersmith
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up your OpenRouter API key
+
+Rename the included `env.txt` file to `.env`:
+
+```bash
+mv env.txt .env
+```
+
+Then edit the file and replace:
+
+```
+OPENROUTERS_API_KEY = "API KEY HERE"
+```
+
+with your actual [OpenRouter](https://openrouter.ai/) API key.
+
+---
+
+### 4. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Project Structure
 
-## Learn More
+\`\`\`
+src/
+├── app/
+│   ├── Components/
+│   │   └── Chat/CoverLetter/
+│   │       ├── CoverInput.js       # User form
+│   │       ├── CoverShow.js        # Output display
+│   │       ├── Uploader.js         # Upload CV
+│   │       └── ActionButtons.js    # Copy/Download/etc
+│   ├── utils/
+│   │   ├── extractText.js          # In-browser PDF/DOCX parsing
+│   │   ├── generatePDF.js
+│   │   └── generateDOCX.js
+│   └── api/Chat/Cover/route.js     # API route calling OpenRouter
+\`\`\`
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧠 Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 🔐 CV file parsing is 100% in-browser — your data stays local.
+- 📡 AI generation uses the OpenRouter API. You must provide an API key via `.env`.
+- 📄 PDF and DOCX downloads are **editable and selectable**, not screenshots.
+- 🧼 Includes graceful error handling and toast notifications.
+- 🧪 If a file fails to parse, users are informed and asked to paste CV text manually.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧳 Deploying
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+You can deploy on any Node.js-compatible host, but **Vercel** is recommended:
+
+```bash
+npm run build
+npm start
+```
+
+To deploy on [Vercel](https://vercel.com/new):
+
+1. Push your project to GitHub
+2. Import your repo into Vercel
+3. Set `OPENROUTERS_API_KEY` in Project Settings → Environment Variables
+
+---
+
+## 💡 Why Lettersmith?
+
+Writing personalized cover letters is painful. Lettersmith AI removes the friction by giving you high-quality drafts that still feel **yours** — with just a few clicks.
+
+---
+
+## 📬 License
+
+MIT — Free to use, fork, and improve.
