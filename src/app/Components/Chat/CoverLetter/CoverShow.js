@@ -37,9 +37,13 @@ const Show = ({ data, loading }) => {
       transition={{ duration: 0.3 }}
       className="w-full h-full border border-neutral-300 rounded-lg p-4 flex flex-col bg-neutral-950 text-white overflow-y-auto"
     >
-      <h2 className="text-lg font-semibold mb-4 border-b border-neutral-700 pb-2">
-        AI Generated Cover Letter
-      </h2>
+      <div className="mb-4 border-b border-neutral-700 pb-2">
+        <h2 className="text-lg font-semibold">AI Generated Cover Letter</h2>
+        <p className="text-xs text-neutral-400 mt-1">
+          Includes industry-relevant keywords to improve ATS compatibility and
+          boost job match success.
+        </p>
+      </div>
 
       <AnimatePresence mode="wait">
         {loading ? (
